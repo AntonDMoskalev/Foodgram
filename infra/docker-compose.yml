@@ -9,9 +9,7 @@ services:
       - ./.env
 
   backend:
-    build:
-      context: ../backend/foodgram
-      dockerfile: Dockerfile
+    image: admoskalev/backend_foodgram
     restart: always
     volumes:
       - static_value:/code/static/
@@ -22,9 +20,7 @@ services:
       - ./.env
 
   frontend:
-    build:
-      context: ../frontend
-      dockerfile: Dockerfile
+    image: admoskalev/frontend_foodgram
     volumes:
       - ../frontend/:/app/result_build/
   nginx:
