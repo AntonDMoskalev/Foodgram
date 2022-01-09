@@ -10,7 +10,7 @@ class TagAdmin(admin.ModelAdmin):
 
 class IngredientAdmin(admin.ModelAdmin):
     list_display = ('name', 'measurement_unit')
-    list_filter = ('name',) 
+    list_filter = ('name',)
 
 
 class RecipeAdmin(admin.ModelAdmin):
