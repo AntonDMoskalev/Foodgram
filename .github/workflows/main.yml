@@ -46,3 +46,8 @@ jobs:
           file: ./backend/foodgram/Dockerfile
           push: true
           tags: admoskalev/backend_foodgram:latest
+        with:
+          context: ./frontend
+          file: ./frontend/Dockerfile
+          push: true
+          tags: admoskalev/frontend_foodgram:latest
