@@ -121,8 +121,9 @@ class RecipeViewSet(CustomRecipeModelViewSet):
                                 pk=pk,
                                 serializers=FavoriteSerializers,
                                 user=request.user)
-        if request.method == 'DELETE':
+        elif request.method == 'DELETE':
             return self.del_obj(model=Favorite, pk=pk, user=request.user)
+        return None
 
     @action(detail=True, methods=['post', 'delete'],
             permission_classes=[permissions.IsAuthenticated])
