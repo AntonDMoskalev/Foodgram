@@ -24,10 +24,6 @@ class UsersAdmin(UserAdmin):
                      'username', 'password', 'email',
                      'first_name', 'last_name',
                      'role', 'last_login', 'date_joined')}),)
-    add_fieldsets = (("User",
-                     {"fields": (
-                         'username', 'password', 'email',
-                         'first_name', 'last_name', 'role')}),)
     search_fields = ('first_name', 'email',)
     list_filter = ('email', 'first_name',)
 

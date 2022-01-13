@@ -1,5 +1,6 @@
 import io
 
+from django.db.models import Sum
 from django.http import FileResponse
 from django.utils.translation import gettext as _
 from django_filters.rest_framework import DjangoFilterBackend
@@ -7,7 +8,7 @@ from djoser.views import UserViewSet
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.pdfgen.canvas import Canvas
-from rest_framework import filters, permissions, status, viewsets
+from rest_framework import filters, permissions, status
 from rest_framework.decorators import action
 from rest_framework.generics import get_object_or_404
 from rest_framework.response import Response
@@ -17,7 +18,7 @@ from recipes.models import (Favorite, Ingredient, IngredientRecipe, Recipe,
 from users.models import Follow, User
 
 from .filters import RecipeFilter
-from .mixins import ListRetrieveCustomViewSet
+from .mixins import CustomRecipeModelViewSet, ListRetrieveCustomViewSet
 from .pagination import LimitPagePagination
 from .permissions import AuthorOrReadOnly
 from .serializers import (FavoriteSerializers, FollowUserSerializers,
@@ -54,11 +55,11 @@ class CustomUserViewSet(UserViewSet):
         author = get_object_or_404(User, id=id)
         if user == author:
             return Response({'errors':
-                            _('You can not subscribe to yourself.')},
+                            _('Вы не можете подписаться на себя.')},
                             status=status.HTTP_400_BAD_REQUEST)
         if Follow.objects.filter(user=user, author=author).exists():
             return Response({'errors':
-                            _('You have already subscribed to the author.')},
+                            _('Вы уже подписались на автора.')},
                             status=status.HTTP_400_BAD_REQUEST)
         Follow.objects.create(user=user, author=author)
         queryset = Follow.objects.get(user=request.user, author=author)
@@ -98,7 +99,7 @@ class IngredientViewSet(ListRetrieveCustomViewSet):
     search_fields = ['name']
 
 
-class RecipeViewSet(viewsets.ModelViewSet):
+class RecipeViewSet(CustomRecipeModelViewSet):
     """
     Receptviews with additional methods:
     1. Add/Remove from favorites
@@ -112,94 +113,58 @@ class RecipeViewSet(viewsets.ModelViewSet):
     filter_class = RecipeFilter
     permission_classes = (AuthorOrReadOnly,)
 
-    @action(detail=True, methods=['post'],
+    @action(detail=True, methods=['post', 'delete'],
             permission_classes=[permissions.IsAuthenticated])
     def favorite(self, request, pk=None):
-        user = request.user
-        recipe = get_object_or_404(Recipe, id=pk)
-        if Favorite.objects.filter(user=user, recipe=recipe).exists():
-            return Response({'errors':
-                             _('Already added to the favorites list')},
-                            status=status.HTTP_400_BAD_REQUEST)
-        Favorite.objects.create(user=user, recipe=recipe)
-        queryset = Favorite.objects.get(user=user, recipe=recipe)
-        serializer = FavoriteSerializers(queryset,
-                                         context={'request': request})
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+        if request.method == 'POST':
+            return self.add_obj(model=Favorite,
+                                pk=pk,
+                                serializers=FavoriteSerializers,
+                                user=request.user)
+        if request.method == 'DELETE':
+            return self.del_obj(model=Favorite, pk=pk, user=request.user)
 
-    @favorite.mapping.delete
-    def favorite_del(self, request, pk=None):
-        user = request.user
-        recipe = get_object_or_404(Recipe, id=pk)
-        if not Favorite.objects.filter(user=user, recipe=recipe).exists():
-            return Response({'errors': _('Not in favorites')},
-                            status=status.HTTP_400_BAD_REQUEST)
-        Favorite.objects.get(user=user, recipe=recipe).delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
-
-    @action(detail=True, methods=['post'],
+    @action(detail=True, methods=['post', 'delete'],
             permission_classes=[permissions.IsAuthenticated])
     def shopping_cart(self, request, pk=None):
-        user = request.user
-        recipe = get_object_or_404(Recipe, id=pk)
-        if ShoppingCart.objects.filter(user=user, recipe=recipe).exists():
-            return Response({'errors':
-                            _('Already added to the shopping list')},
-                            status=status.HTTP_400_BAD_REQUEST)
-        ShoppingCart.objects.create(user=user, recipe=recipe)
-        queryset = ShoppingCart.objects.get(user=user, recipe=recipe)
-        serializer = ShoppingCardSerializers(queryset,
-                                             context={'request': request})
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
-
-    @shopping_cart.mapping.delete
-    def shopping_cart_del(self, request, pk=None):
-        user = request.user
-        recipe = get_object_or_404(Recipe, id=pk)
-        if not ShoppingCart.objects.filter(user=user, recipe=recipe).exists():
-            return Response({'errors':
-                            _('The recipe is not in the shopping list')},
-                            status=status.HTTP_400_BAD_REQUEST)
-        ShoppingCart.objects.get(user=user, recipe=recipe).delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
+        if request.method == 'POST':
+            return self.add_obj(model=ShoppingCart,
+                                pk=pk,
+                                serializers=ShoppingCardSerializers,
+                                user=request.user)
+        if request.method == 'DELETE':
+            return self.del_obj(model=ShoppingCart, pk=pk, user=request.user)
+        return Response(_('Разрешены только POST и DELETE запросы'),
+                        status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
     @action(detail=False, permission_classes=[permissions.IsAuthenticated])
     def download_shopping_cart(self, request):
         user = request.user
-        ingredient_shop = {}
         ingredients = IngredientRecipe.objects.filter(
-            recipe__shopping_carts__user=user
-        )
-        for ingredient in ingredients:
-            if ingredient.ingredient.name not in ingredient_shop:
-                ingredient_shop[ingredient.ingredient.name] = [
-                    ingredient.ingredient.measurement_unit, ingredient.amount
-                ]
-            else:
-                ingredient_shop[
-                    ingredient.ingredient.name
-                ][1] += ingredient.amount
-
+            recipe__shopping_carts__user=user).values(
+                'ingredient__name',
+                'ingredient__measurement_unit').order_by(
+                    'ingredient__name').annotate(amount=Sum('amount'))
         buffer = io.BytesIO()
         canvas = Canvas(buffer)
         pdfmetrics.registerFont(
             TTFont('Country', 'Country.ttf', 'UTF-8'))
         canvas.setFont('Country', size=36)
-        canvas.drawString(70, 800, 'Продуктовый помощник')
-        canvas.drawString(70, 760, 'список покупок:')
+        canvas.drawString(70, 800, _('Продуктовый помощник'))
+        canvas.drawString(70, 760, _('список покупок:'))
         canvas.setFont('Country', size=18)
-        canvas.drawString(70, 700, 'Ингредиенты:')
+        canvas.drawString(70, 700, _('Ингредиенты:'))
         canvas.setFont('Country', size=16)
-        canvas.drawString(70, 670, 'Название:')
-        canvas.drawString(220, 670, 'Количество:')
-        canvas.drawString(350, 670, 'Единица измерения:')
+        canvas.drawString(70, 670, _('Название:'))
+        canvas.drawString(220, 670, _('Количество:'))
+        canvas.drawString(350, 670, _('Единица измерения:'))
         height = 630
-        for ingredients in ingredient_shop:
-            canvas.drawString(70, height, f'{ingredients}')
+        for ingredient in ingredients:
+            canvas.drawString(70, height, f"{ingredient['ingredient__name']}")
             canvas.drawString(250, height,
-                              f'{ingredient_shop[ingredients][1]}')
+                              f"{ingredient['amount']}")
             canvas.drawString(380, height,
-                              f'{ingredient_shop[ingredients][0]}')
+                              f"{ingredient['ingredient__measurement_unit']}")
             height -= 25
         canvas.save()
         buffer.seek(0)

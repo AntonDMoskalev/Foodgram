@@ -12,18 +12,17 @@ class User(AbstractUser):
     """
     USER = 'user'
     ADMIN = 'admin'
-    BLOCK = 'block'
 
-    CHOICES = [(USER, _('user')),
-               (ADMIN, _('admin')),
-               (BLOCK, _('block'))]
+    CHOICES = [(USER, _('Пользователь')),
+               (ADMIN, _('Администратор'))]
 
-    email = models.EmailField(_('email'), max_length=254, unique=True)
-    username = models.CharField(_('username'), unique=True, max_length=150)
-    first_name = models.CharField(_('first_name'), max_length=150)
-    last_name = models.CharField(_('last_name'), max_length=150)
-    password = models.CharField(_('password'), max_length=150)
-    role = models.CharField(_('role'),
+    email = models.EmailField(_('Электронная почта'),
+                              max_length=254, unique=True)
+    username = models.CharField(_('Логин пользователя'),
+                                unique=True, max_length=150)
+    first_name = models.CharField(_('Имя'), max_length=150)
+    last_name = models.CharField(_('Фамилия'), max_length=150)
+    role = models.CharField(_('Статус'),
                             choices=CHOICES,
                             default=USER,
                             max_length=20)
@@ -42,9 +41,9 @@ class User(AbstractUser):
         return f"{self.first_name} {self.last_name}"
 
     class Meta:
-        ordering = ['-first_name']
-        verbose_name = _('User')
-        verbose_name_plural = _('Users')
+        ordering = ['-id']
+        verbose_name = _('Пользователь')
+        verbose_name_plural = _('Пользователи')
 
 
 class Follow(models.Model):
@@ -52,12 +51,18 @@ class Follow(models.Model):
     user = models.ForeignKey(
         User, on_delete=models.CASCADE,
         related_name='follower',
-        verbose_name=_('user'))
+        verbose_name=_('Пользователь'))
     author = models.ForeignKey(
         User, on_delete=models.CASCADE,
         related_name='following',
-        verbose_name=_('author'))
+        verbose_name=_('Автор'))
+
+    def __str__(self):
+        return f"{self.user} подписан на {self.author}"
 
     class Meta():
+        ordering = ['-id']
+        verbose_name = _('Подписка')
+        verbose_name_plural = _('Подписки')
         models.UniqueConstraint(
             fields=['user', 'author'], name='unique_recording')

@@ -55,8 +55,7 @@ class FollowUserSerializers(serializers.ModelSerializer):
 
     class Meta:
         model = Follow
-        fields = ('email', 'id', 'username', 'first_name', 'last_name',
-                  'is_subscribed', 'recipes', 'recipes_count')
+        fields = '__all__'
 
 
 class TagSerializers(serializers.ModelSerializer):
@@ -74,7 +73,7 @@ class IngredientSerializers(serializers.ModelSerializer):
     """
     class Meta:
         model = Ingredient
-        fields = ('id', 'name', 'measurement_unit')
+        fields = '__all__'
 
 
 class IngredientRecipeSerializers(serializers.ModelSerializer):
@@ -90,7 +89,7 @@ class IngredientRecipeSerializers(serializers.ModelSerializer):
 
     class Meta:
         model = IngredientRecipe
-        fields = ('id', 'name', 'measurement_unit', 'amount')
+        fields = '__all__'
 
 
 class RecipeSerializers(serializers.ModelSerializer):
@@ -130,22 +129,18 @@ class RecipeSerializers(serializers.ModelSerializer):
             for ingredient in ingredients:
                 if ingredient.get('id') in ingredients_list:
                     raise ValidationError(
-                        _('Each ingredient can only be added once')
-                    )
-                if not ingredient.get('amount').isdigit():
-                    raise ValidationError(
-                        _('Enter a number in the number of ingredients')
+                        _('Каждый ингредиент может быть добавлен только один раз')
                     )
                 if int(ingredient.get('amount')) <= 0:
                     raise ValidationError(
-                        _('The number of ingredients must be greater than 0')
+                        _('Добавьте количество для ингредиента больше 0')
                     )
                 ingredients_list[ingredient.get('id')] = (
                     ingredients_list.get('amount')
                 )
             return data
         else:
-            raise ValidationError(_('Add an ingredient to the recipe'))
+            raise ValidationError(_('Добавьте ингредиент в рецепт'))
 
     def ingredient_recipe_create(self, ingredients_set, recipe):
         for ingredient_get in ingredients_set:
@@ -183,9 +178,7 @@ class RecipeSerializers(serializers.ModelSerializer):
 
     class Meta:
         model = Recipe
-        fields = ('id', 'tags', 'author', 'image', 'ingredients',
-                  'is_favorited', 'is_in_shopping_cart', 'name', 'text',
-                  'cooking_time')
+        fields = '__all__'
 
 
 class FavoriteSerializers(serializers.ModelSerializer):
@@ -199,7 +192,7 @@ class FavoriteSerializers(serializers.ModelSerializer):
 
     class Meta:
         model = Favorite
-        fields = ('id', 'name', 'image', 'cooking_time')
+        fields = '__all__'
 
 
 class ShoppingCardSerializers(serializers.ModelSerializer):
@@ -213,4 +206,4 @@ class ShoppingCardSerializers(serializers.ModelSerializer):
 
     class Meta:
         model = ShoppingCart
-        fields = ('id', 'name', 'image', 'cooking_time')
+        fields = '__all__'

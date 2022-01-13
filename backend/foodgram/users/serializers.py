@@ -13,13 +13,12 @@ class CustomCreateUserSerializers(serializers.ModelSerializer):
     password = serializers.CharField(
         write_only=True,
         required=True,
-        style={'input_type': _('password'), 'placeholder': _('Password')}
+        style={'input_type': _('Пароль'), 'placeholder': _('Пароль')}
     )
 
     class Meta:
         model = User
-        fields = ('email', 'id', 'username',
-                  'first_name', 'last_name', 'password')
+        fields = '__all__'
 
     def create(self, validated_data):
         validated_data['password'] = make_password(
@@ -43,5 +42,4 @@ class CustomUserSerializers(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ('email', 'id', 'username',
-                  'first_name', 'last_name', 'is_subscribed')
+        fields = '__all__'
