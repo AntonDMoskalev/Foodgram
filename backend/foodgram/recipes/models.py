@@ -78,8 +78,7 @@ class IngredientRecipe(models.Model):
     amount = models.PositiveSmallIntegerField(_('Количество'))
 
     def __str__(self):
-        return f"Ингредиент: {self.ingredient}, \
-                Рецепт: {self.recipe}, Сумма: {self.amount}"
+        return f"Ингредиент: {self.ingredient}, Рецепт: {self.recipe}"
 
     class Meta():
         ordering = ['-id']

@@ -129,8 +129,7 @@ class RecipeSerializers(serializers.ModelSerializer):
             for ingredient in ingredients:
                 if ingredient.get('id') in ingredients_list:
                     raise ValidationError(
-                        _('Каждый ингредиент может быть добавлен только один раз')
-                    )
+                        _('Ингредиент может быть добавлен только один раз'))
                 if int(ingredient.get('amount')) <= 0:
                     raise ValidationError(
                         _('Добавьте количество для ингредиента больше 0')

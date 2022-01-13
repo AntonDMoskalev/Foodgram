@@ -29,7 +29,7 @@ msgid "{recipe} не добавлен в {model}"
 msgstr "{recipe} not added in {model}"
 
 #: .\api\serializers.py:132
-msgid "Каждый ингредиент может быть добавлен только один раз"
+msgid "Ингредиент может быть добавлен только один раз"
 msgstr "Each ingredient can only be added once"
 
 #: .\api\serializers.py:136
