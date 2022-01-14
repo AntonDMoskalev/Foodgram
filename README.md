@@ -65,7 +65,9 @@
 
 #### Выполнить миграции, собрать статику, создать суперпользователя(По необходимости)
 >sudo docker-compose exec backend python manage.py migrate
+
 >sudo docker-compose exec backend python manage.py collectstatic
+
 >sudo docker-compose exec backend python manage.py createsuperuser
 
 #### Загрузить ингредиенты в базу данных
