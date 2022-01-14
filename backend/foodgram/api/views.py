@@ -8,7 +8,7 @@ from djoser.views import UserViewSet
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.pdfgen.canvas import Canvas
-from rest_framework import filters, permissions, status
+from rest_framework import permissions, status
 from rest_framework.decorators import action
 from rest_framework.generics import get_object_or_404
 from rest_framework.response import Response
@@ -17,7 +17,7 @@ from recipes.models import (Favorite, Ingredient, IngredientRecipe, Recipe,
                             ShoppingCart, Tag)
 from users.models import Follow, User
 
-from .filters import RecipeFilter
+from .filters import IngredientSearchFilter, RecipeFilter
 from .mixins import CustomRecipeModelViewSet, ListRetrieveCustomViewSet
 from .pagination import LimitPagePagination
 from .permissions import AuthorOrReadOnly
@@ -95,8 +95,8 @@ class IngredientViewSet(ListRetrieveCustomViewSet):
     queryset = Ingredient.objects.all()
     serializer_class = IngredientSerializers
     permission_classes = (permissions.AllowAny,)
-    filter_backends = [filters.SearchFilter]
-    search_fields = ['name']
+    filter_backends = (IngredientSearchFilter,)
+    search_fields = ('name',)
 
 
 class RecipeViewSet(CustomRecipeModelViewSet):
