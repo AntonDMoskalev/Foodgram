@@ -33,7 +33,7 @@
 
 >sudo chmod +x /usr/local/bin/docker-compose
 
-#### Загрузите файлы docker-compose.yaml и nginx.conf на удалённый сервер
+#### Загрузите файлы docker-compose.yaml и nginx.conf на удалённый сервер.
 >scp /mnt/c/<Путь к проекту>/infra/nginx.conf  <login>@<IP>:/home/<Имя>
 >scp /mnt/c/<Путь к проекту>/infra/docker-compose.yaml  <login>@<IP>:/home/<Имя>
 
