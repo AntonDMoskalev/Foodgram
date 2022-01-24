@@ -12,7 +12,7 @@
 # Запуск проекта:
 
 #### Склонировать репозиторий
-> https://github.com/AntonDMoskalev/foodgram-project-react.git
+> https://github.com/AntonDMoskalev/Foodgram.git
 
 # Подготовка сервера:
 
