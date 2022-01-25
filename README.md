@@ -34,6 +34,7 @@
 
 #### Загрузите файлы docker-compose.yaml и nginx.conf на удалённый сервер.
 >scp /mnt/c/<Путь к проекту>/infra/nginx.conf  <login>@<IP>:/home/<Имя>
+
 >scp /mnt/c/<Путь к проекту>/infra/docker-compose.yaml  <login>@<IP>:/home/<Имя>
 
 #### Добавьте в Secrets GitHub переменные окружения:
@@ -51,17 +52,21 @@
 >DB_PORT = "5432"
 
 >DOCKER_PASSWORD=<пароль от DockerHub>
+
 >DOCKER_USERNAME=<имя пользователя>
 
 >DJANGO_SK=<секретный ключ проекта django>
 
 >USER=<username для подключения к серверу>
+
 >HOST=<IP сервера>
+
 >PASSPHRASE=<пароль для сервера, если он установлен>
+
 >SSH_KEY=<ваш SSH ключ (для получения команда: cat ~/.ssh/id_rsa)>(Копировать полностью)
 
 
-### Workflow состоит из трёх шагов:
+## Workflow состоит из трёх шагов:
 ##### Тестирование проекта PEP8.
 ##### Сборка и публикация образа.
 ##### Автоматический деплой на сервер.
@@ -79,4 +84,4 @@
 #### Загрузить ингредиенты в базу данных
 >sudo docker-compose exec backend python manage.py load_ingredients ingredients.json
 
-#### Проект доступен по [адресу](http://178.154.227.92/)
+## Проект доступен по [адресу](http://178.154.227.92/)
